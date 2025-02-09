@@ -5,11 +5,11 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [sveltekit(), tailwindcss()],
     preview: {
-        port: 4001,
+        port: 3001,
         strictPort: true
     },
     server: {
-        port: 4000,
+        port: 3000,
         strictPort: true
     }
 });
