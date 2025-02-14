@@ -1,1 +1,1 @@
-<h2>Welcome to SleekVim test</h2>
+<h2>Welcome to SleekVim</h2>
