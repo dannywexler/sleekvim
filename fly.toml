@@ -9,19 +9,19 @@ primary_region = 'lax'
 [build]
 
 [http_service]
-  auto_start_machines = true
-  auto_stop_machines = false
-  force_https = true
-  internal_port = 3000
-  min_machines_running = 0
+auto_start_machines = true
+auto_stop_machines = false
+force_https = true
+internal_port = 3000
+min_machines_running = 0
 
 [mounts]
-  destination = "/data"
-  snapshot_retention = 60
-  source = "sleekvim_data"
+destination = "/data"
+snapshot_retention = 60
+source = "sleekvim_data"
 
 [[vm]]
-  cpu_kind = 'shared'
-  cpus = 1
-  memory = '256mb'
-  size = 'shared-cpu-1x'
+cpu_kind = 'shared'
+cpus = 1
+memory = '256mb'
+size = 'shared-cpu-1x'

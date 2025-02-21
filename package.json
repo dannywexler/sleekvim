@@ -1,42 +1,43 @@
 {
-	"name": "sleekvim",
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-	    "predev": "bun run check",
-		"dev": "vite dev",
-		"prebuild": "bun run check",
-		"build": "vite build",
-		"prepreview": "bun run check",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check && eslint .",
-		"check:watch": "svelte-kit sync && svelte-check --watch",
-		"lint": "eslint .",
-		"db:push": "drizzle-kit push",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
-	},
-	"devDependencies": {
-		"@eslint/compat": "^1.2.5",
-		"@eslint/js": "^9.18.0",
-		"@sveltejs/adapter-node": "^5.2.12",
-		"@sveltejs/kit": "^2.16.0",
-		"@sveltejs/vite-plugin-svelte": "^5.0.0",
-		"@tailwindcss/vite": "^4.0.0",
-		"@types/bun": "^1.2.2",
-		"drizzle-kit": "^0.30.2",
-		"eslint": "^9.18.0",
-		"eslint-plugin-svelte": "^2.46.1",
-		"globals": "^15.14.0",
-		"svelte": "^5.0.0",
-		"svelte-check": "^4.0.0",
-		"tailwindcss": "^4.0.0",
-		"typescript": "^5.0.0",
-		"typescript-eslint": "^8.20.0",
-		"vite": "^6.0.0"
-	},
-	"dependencies": {
-		"drizzle-orm": "^0.39.2"
-	}
+    "name": "sleekvim",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "predev": "bun run check",
+        "dev": "vite dev",
+        "prebuild": "bun run check",
+        "build": "vite build",
+        "prepreview": "bun run check",
+        "preview": "vite preview",
+        "prepare": "svelte-kit sync || echo ''",
+        "check": "svelte-kit sync && svelte-check && eslint src --fix --cache",
+        "check:watch": "svelte-kit sync && svelte-check --watch",
+        "lint": "eslint .",
+        "db:push": "drizzle-kit push",
+        "db:migrate": "drizzle-kit migrate",
+        "db:studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.39.2"
+    },
+    "devDependencies": {
+        "@antfu/eslint-config": "^4.3.0",
+        "@eslint/compat": "^1.2.5",
+        "@eslint/js": "^9.18.0",
+        "@sveltejs/adapter-node": "^5.2.12",
+        "@sveltejs/kit": "^2.16.0",
+        "@sveltejs/vite-plugin-svelte": "^5.0.0",
+        "@tailwindcss/vite": "^4.0.0",
+        "@types/bun": "^1.2.2",
+        "drizzle-kit": "^0.30.2",
+        "eslint": "^9.18.0",
+        "eslint-plugin-svelte": "^2.46.1",
+        "globals": "^15.14.0",
+        "svelte": "^5.0.0",
+        "svelte-check": "^4.0.0",
+        "tailwindcss": "^4.0.0",
+        "typescript": "^5.0.0",
+        "typescript-eslint": "^8.20.0",
+        "vite": "^6.0.0"
+    }
 }
