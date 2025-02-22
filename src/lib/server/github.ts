@@ -1,13 +1,35 @@
-import type { Strings } from "$src/common"
+import type { Alogger } from "$src/logging"
 import type { Low } from "lowdb"
 import { ENV } from "$src/env"
-import { CACHE, PROJECTS, READMES } from "$src/paths"
+import { logFn } from "$src/logging"
+import { CACHE, READMES } from "$src/paths"
 import { Octokit } from "@octokit/rest"
+import { assertString } from "@sindresorhus/is"
+import { sleep } from "bun"
 import { file } from "fluent-file"
 import { JSONFilePreset } from "lowdb/node"
+import { z, ZodIssueCode } from "zod"
+import { str } from "../utils/strings"
 import { dload } from "./download"
 
+function GH_TOKEN() {
+    const key = "GITHUB_PA_TOKEN"
+    const token = import.meta.env[key]
+    assertString(token, `MISSING ${key}`)
+    return token
+}
+
+const octokit = new Octokit({
+    auth: GH_TOKEN(),
+})
+
+octokit.hook.before("request", async () => {
+    await sleep(1000)
+})
+
 export const README = "README.md"
+
+const GITHUB_IO = ".github.io"
 
 const GITHUB_RAW_CONTENT_HOST = "raw.githubusercontent.com"
 
@@ -45,7 +67,7 @@ async function cachedProject<Field extends keyof GithubCacheEntry>(
     if (!ghCache) {
         const ghCacheFile = file(CACHE, "github.json")
         await CACHE.ensureExists()
-        ghCache = await JSONFilePreset<GithubCache>(ghCacheFile.path, {})
+        ghCache = await JSONFilePreset<GithubCache>(ghCacheFile.path, { defaults: {} })
     }
     const id = projectID(project)
     const entry = ghCache.data[id]
@@ -57,17 +79,14 @@ async function cachedProject<Field extends keyof GithubCacheEntry>(
     void ghCache.write()
 }
 
-const octokit = new Octokit({
-})
-
-export async function fetchProjectStats(project: GithubProject): Promise<GithubProjectStats> {
+export const fetchProjectStats = logFn("fetchProjectStats", async (project: GithubProject, lg: Alogger) => {
+    const { owner, repo } = project
     const existingProjectStats = await cachedProject(project, "stats")
     if (existingProjectStats && ENV.DEV) {
+        lg.log({ evt: "CACHED:", data: existingProjectStats })
         return existingProjectStats
     }
-    const { owner, repo } = project
     const { data } = await octokit.rest.repos.get({ owner, repo })
-    // console.log("Got", owner, "/", repo, "data:", data)
     const updatedStats = {
         branch: data.default_branch,
         description: data.description,
@@ -77,32 +96,82 @@ export async function fetchProjectStats(project: GithubProject): Promise<GithubP
         writtenIn: data.language,
     }
     void cachedProject(project, "stats", updatedStats)
+    lg.log({ evt: "FETCHED:", data: updatedStats })
     return updatedStats
-}
+})
 
-export async function fetchProjectReadmePath(project: GithubProject) {
+export const fetchProjectReadmePath = logFn("fetchProjectReadmePath", async (project: GithubProject, lg: Alogger) => {
+    const { owner, repo } = project
     const existingProjectReadmepath = await cachedProject(project, "readmePath")
     if (existingProjectReadmepath) {
+        lg.log({ evt: "CACHED:", data: existingProjectReadmepath })
         return existingProjectReadmepath
     }
-    const { owner, repo } = project
     const res = await octokit.rest.repos.getReadme({ owner, repo })
     const readmePath = res.data.path
     void cachedProject(project, "readmePath", readmePath)
+    lg.log({ evt: "FETCHED:", data: readmePath })
     return readmePath
-}
+})
 
-export async function downloadProjectReadme(project: GithubProject) {
+export const downloadProjectReadme = logFn("downloadProjectReadme", async (project: GithubProject) => {
+    const { owner, repo } = project
     const branch = (await fetchProjectStats(project)).branch
     const readmePath = await fetchProjectReadmePath(project)
-    const { owner, repo } = project
     const destination = file(READMES, owner, repo, README)
     await dload([GITHUB_RAW_CONTENT_HOST, owner, repo, branch, readmePath], destination)
-}
+})
 
-export async function downloadProjectFile(project: GithubProject, pathToFile: Strings) {
-    const branch = (await fetchProjectStats(project)).branch
-    const { owner, repo } = project
-    const destination = file(PROJECTS, owner, repo, ...pathToFile)
-    await dload([GITHUB_RAW_CONTENT_HOST, owner, repo, branch, ...pathToFile], destination)
-}
+export const githubURL = z.string().url().transform((urlstr, { addIssue }) => {
+    const og = new URL(urlstr)
+    const path = og.pathname.split("/").filter(Boolean)
+    const firstPathPiece = path.shift()
+    const secondPathPiece = path.shift()
+    const host = str(og.host)
+    if (host.endsWith(GITHUB_IO) && firstPathPiece) {
+        return {
+            owner: host.removeSuffix(GITHUB_IO).toString(),
+            repo: firstPathPiece,
+        }
+    }
+    if (og.host !== "github.com") {
+        addIssue({
+            code: ZodIssueCode.custom,
+            message: "Host was not github.com",
+        })
+        return z.NEVER
+    }
+    if (!firstPathPiece) {
+        addIssue({
+            code: ZodIssueCode.custom,
+            message: "Missing owner",
+        })
+        return z.NEVER
+    }
+    const owner = firstPathPiece
+
+    if (!secondPathPiece) {
+        addIssue({
+            code: ZodIssueCode.custom,
+            message: "Missing repo",
+        })
+        return z.NEVER
+    }
+    let repo = secondPathPiece
+    if (owner === "echasnovski") {
+        // console.log("echasnovski:", urlstr)
+        const lastPathPiece = path.pop()
+        if (!lastPathPiece) {
+            addIssue({
+                code: ZodIssueCode.custom,
+                message: "Missing lastPathPiece",
+            })
+            return z.NEVER
+        }
+        repo = lastPathPiece.replace("-", ".").replace(".md", "")
+    }
+    return {
+        owner,
+        repo,
+    }
+})
