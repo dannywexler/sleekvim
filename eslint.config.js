@@ -14,6 +14,13 @@ export default antfu(
         svelte: true,
         typescript: {
             tsconfigPath: "tsconfig.json",
+            overrides: {
+                "no-console": "off",
+            },
+            overridesTypeAware: {
+                "ts/consistent-type-definitions": ["error", "type"],
+                "ts/strict-boolean-expressions": "off",
+            },
         },
         yaml: false,
     },
