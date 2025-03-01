@@ -9,6 +9,7 @@ export default defineConfig({
     dbCredentials: { url },
     dialect: "postgresql",
     driver: "pglite",
+    out: "./db_migrations",
     schema: "./src/lib/server/db/*.table.ts",
     strict: true,
     verbose: true,
