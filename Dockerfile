@@ -27,6 +27,12 @@ RUN bun install
 # Copy application code
 COPY . .
 
+RUN mkdir -p /data/cache
+RUN mkdir -p /data/database
+RUN mkdir -p /data/logs
+RUN mkdir -p /data/projects
+RUN mkdir -p /data/readmes
+
 # Build application
 RUN bun --bun run build
 
