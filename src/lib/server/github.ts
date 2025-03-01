@@ -79,15 +79,15 @@ async function cachedProject<Field extends keyof GithubCacheEntry>(
     void ghCache.write()
 }
 
-export const fetchProjectStats = logFn("fetchProjectStats", async (project: GithubProject, lg: Alogger) => {
+export const fetchProjectStats = logFn("GITHUB", "STATS", "fetchProjectStats", async (project: GithubProject, lg: Alogger) => {
     const { owner, repo } = project
-    const existingProjectStats = await cachedProject(project, "stats")
-    if (existingProjectStats && ENV.DEV) {
-        lg.log({ evt: "CACHED:", data: existingProjectStats })
-        return existingProjectStats
+    const cachedProjectStats = await cachedProject(project, "stats")
+    if (cachedProjectStats && ENV.DEV) {
+        lg.log("CACHED ProjectStats", { cachedProjectStats })
+        return cachedProjectStats
     }
     const { data } = await octokit.rest.repos.get({ owner, repo })
-    const updatedStats = {
+    const fetchedProjecStats = {
         branch: data.default_branch,
         description: data.description,
         isArchived: data.archived,
@@ -95,26 +95,26 @@ export const fetchProjectStats = logFn("fetchProjectStats", async (project: Gith
         updatedOn: data.pushed_at,
         writtenIn: data.language,
     }
-    void cachedProject(project, "stats", updatedStats)
-    lg.log({ evt: "FETCHED:", data: updatedStats })
-    return updatedStats
+    void cachedProject(project, "stats", fetchedProjecStats)
+    lg.log("FETCHED ProjectStats", { fetchedProjecStats })
+    return fetchedProjecStats
 })
 
-export const fetchProjectReadmePath = logFn("fetchProjectReadmePath", async (project: GithubProject, lg: Alogger) => {
+export const fetchProjectReadmePath = logFn("GITHUB", "README", "fetchProjectReadmePath", async (project: GithubProject, lg: Alogger) => {
     const { owner, repo } = project
-    const existingProjectReadmepath = await cachedProject(project, "readmePath")
-    if (existingProjectReadmepath) {
-        lg.log({ evt: "CACHED:", data: existingProjectReadmepath })
-        return existingProjectReadmepath
+    const cachedProjectReadmePath = await cachedProject(project, "readmePath")
+    if (cachedProjectReadmePath) {
+        lg.log("CACHED ProjectReadmePath", { cachedProjectReadmePath })
+        return cachedProjectReadmePath
     }
     const res = await octokit.rest.repos.getReadme({ owner, repo })
     const readmePath = res.data.path
     void cachedProject(project, "readmePath", readmePath)
-    lg.log({ evt: "FETCHED:", data: readmePath })
+    lg.log("FETCHED ProjectReadmePath", { existingProjectReadmepath: cachedProjectReadmePath })
     return readmePath
 })
 
-export const downloadProjectReadme = logFn("downloadProjectReadme", async (project: GithubProject) => {
+export const downloadProjectReadme = logFn("GITHUB", "README", "downloadProjectReadme", async (project: GithubProject) => {
     const { owner, repo } = project
     const branch = (await fetchProjectStats(project)).branch
     const readmePath = await fetchProjectReadmePath(project)
