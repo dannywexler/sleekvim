@@ -1,4 +1,8 @@
+import { env } from "node:process"
+
+const PROD = env.NODE_ENV === "production"
+
 export const ENV = {
-    DEV: import.meta.env.DEV ?? true,
-    PROD: import.meta.env.PROD ?? false,
+    DEV: !PROD,
+    PROD,
 }

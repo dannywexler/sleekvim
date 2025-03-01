@@ -1,13 +1,15 @@
 import { defineConfig } from "drizzle-kit"
+import { ENV } from "./src/env.ts"
 
+const prefix = ENV.DEV ? "./" : "/"
+const url = prefix + "data/database"
+
+console.log('Drizzle syncing database schema in:', url)
 export default defineConfig({
-    schema: "./src/lib/server/db/schema.ts",
-
-    dbCredentials: {
-        url: "somefile.db",
-    },
-
-    verbose: true,
+    dbCredentials: { url },
+    dialect: "postgresql",
+    driver: "pglite",
+    schema: "./src/lib/server/db/*.table.ts",
     strict: true,
-    dialect: "sqlite",
+    verbose: true,
 })
