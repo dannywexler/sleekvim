@@ -46,9 +46,10 @@ FROM base
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
-# CMD [ "bun", "./build/index.js" ]
 EXPOSE 3000
-CMD echo "Creating data dirs" && mkdir -p /data/{cache,database,logs,projects,readmes} && echo "Created data dirs" && \
-echo "Running drizzle-kit push" && bunx drizzle-kit push --force && echo "Ran drizzle-kit push" && \
-echo "Starting app" && \
-bun ./build/index.js
+CMD [ "bun", "./build/index.js" ]
+
+# CMD echo "Creating data dirs" && mkdir -p /data/{cache,database,logs,projects,readmes} && echo "Created data dirs" && \
+# echo "Running drizzle-kit push" && bunx drizzle-kit push --force && echo "Ran drizzle-kit push" && \
+# echo "Starting app" && \
+# bun ./build/index.js
