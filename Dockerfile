@@ -24,14 +24,12 @@ RUN apt-get update -qq && \
 COPY .npmrc bun.lock bun.lockb package.json ./
 RUN bun install
 
+RUN bunx drizzle-kit push --force
+
 # Copy application code
 COPY . .
 
-RUN mkdir -p /data/cache
-RUN mkdir -p /data/database
-RUN mkdir -p /data/logs
-RUN mkdir -p /data/projects
-RUN mkdir -p /data/readmes
+RUN mkdir -p /data/{cache,database,logs,projects,readmes}
 
 # Build application
 RUN bun --bun run build
