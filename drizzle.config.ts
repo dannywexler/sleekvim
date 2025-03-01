@@ -7,7 +7,8 @@ const url = prefix + "data/database"
 console.log('Drizzle syncing database schema in:', url)
 export default defineConfig({
     dbCredentials: { url },
-    dialect: "sqlite",
+    dialect: "postgresql",
+    driver: "pglite",
     out: "./db_migrations",
     schema: "./src/lib/server/db/*.table.ts",
     strict: true,

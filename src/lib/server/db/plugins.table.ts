@@ -1,6 +1,6 @@
-import { sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { pgTable, text } from "drizzle-orm/pg-core"
 
-export const PluginsTable = sqliteTable("plugins", {
+export const PluginsTable = pgTable("plugins", {
     owner: text().notNull(),
     repo: text().notNull(),
     description: text().notNull(),
