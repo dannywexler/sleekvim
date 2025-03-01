@@ -27,26 +27,28 @@ RUN bun install
 # Copy application code
 COPY . .
 
-RUN bunx drizzle-kit push --force
-
-RUN mkdir -p /data/{cache,database,logs,projects,readmes}
 
 # Build application
 RUN bun --bun run build
 
 # Remove development dependencies
-RUN rm -rf node_modules && \
-    bun install --ci
+# RUN rm -rf node_modules && \
+#     bun install --ci
 
 
 # Final stage for app image
 FROM base
 
 # Copy built application
-COPY --from=build /app/build /app/build
-COPY --from=build /app/node_modules /app/node_modules
-COPY --from=build /app/package.json /app
+# COPY --from=build /app/build /app/build
+# COPY --from=build /app/node_modules /app/node_modules
+# COPY --from=build /app/package.json /app
+COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "bun", "./build/index.js" ]
+# CMD [ "bun", "./build/index.js" ]
+
+CMD mkdir -p /data/{cache,database,logs,projects,readmes} && \
+bunx drizzle-kit push --force && \
+bun ./build/index.js
