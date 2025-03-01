@@ -37,7 +37,7 @@ function createLogger(context: Rec): Alogger {
 function metaLog(level: LogLevel, msg: string, data: Record<string, unknown>) {
     const timestamp = new Date().toISOString()
     logToConsole(timestamp, level, msg, data)
-    logToFile(timestamp, level, msg, data)
+    void logToFile(timestamp, level, msg, data)
 }
 
 function logToConsole(timestamp: string, level: LogLevel, msg: string, data: Record<string, unknown>) {
@@ -90,7 +90,7 @@ export function logFn<Fn extends AnyFunc>(service: string, scope: string, func: 
         const inputArgs = Object.fromEntries(args.map((val, index) => [`arg${index.toString().padStart(totalArgs, "0")}`, val]))
         lg.log(`${func} called`, { startTime, stage: "CALLED", ...inputArgs })
 
-        const output = await fn(...args, lg)
+        const output = await fn(...args, lg) as Promise<Awaited<ReturnType<Fn>>>
 
         const end = new Date()
         const endTime = end.toISOString()

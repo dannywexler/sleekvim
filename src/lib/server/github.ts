@@ -14,7 +14,7 @@ import { dload } from "./download"
 
 function GH_TOKEN() {
     const key = "GITHUB_PA_TOKEN"
-    const token = import.meta.env[key]
+    const token = import.meta.env[key] as string | undefined
     assertString(token, `MISSING ${key}`)
     return token
 }
