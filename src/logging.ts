@@ -1,5 +1,5 @@
 import { appendFile } from "node:fs/promises"
-import { file } from "fluent-file"
+import { afile } from "fluent-file"
 import stringify from "safe-stable-stringify"
 import { DATA } from "./paths"
 
@@ -60,7 +60,7 @@ async function logToFile(timestamp: string, level: LogLevel, msg: string, data: 
     const month = date.substring(5, 7)
 
     const str = `${stringify({ ...data, timestamp, level, msg }) ?? ""}\n`
-    const logFile = file(DATA, "logs", year, month, `${date}.log`)
+    const logFile = afile(DATA, "logs", year, month, `${date}.log`)
 
     try {
         await appendFile(logFile.path, str)

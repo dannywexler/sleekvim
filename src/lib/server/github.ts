@@ -6,7 +6,7 @@ import { CACHE, READMES } from "$src/paths"
 import { Octokit } from "@octokit/rest"
 import { assertString } from "@sindresorhus/is"
 import { sleep } from "bun"
-import { file } from "fluent-file"
+import { afile } from "fluent-file"
 import { JSONFilePreset } from "lowdb/node"
 import { z, ZodIssueCode } from "zod"
 import { str } from "../utils/strings"
@@ -54,6 +54,7 @@ export type GithubProjectStats = {
     description: string | null
     isArchived: boolean
     stars: number
+    createdOn: string
     updatedOn: string
     writtenIn: string | null
 }
@@ -65,7 +66,7 @@ async function cachedProject<Field extends keyof GithubCacheEntry>(
     value?: GithubCacheEntry[Field],
 ) {
     if (!ghCache) {
-        const ghCacheFile = file(CACHE, "github.json")
+        const ghCacheFile = afile(CACHE, "github.json")
         await CACHE.ensureExists()
         ghCache = await JSONFilePreset<GithubCache>(ghCacheFile.path, { defaults: {} })
     }
@@ -87,12 +88,16 @@ export const fetchProjectStats = logFn("GITHUB", "STATS", "fetchProjectStats", a
         return cachedProjectStats
     }
     const { data } = await octokit.rest.repos.get({ owner, repo })
+    const updatedMs = new Date(data.updated_at).getTime()
+    const pushedMs = new Date(data.pushed_at).getTime()
+    const updatedOn = new Date(Math.max(updatedMs, pushedMs)).toISOString()
     const fetchedProjecStats = {
         branch: data.default_branch,
         description: data.description,
         isArchived: data.archived,
         stars: data.stargazers_count,
-        updatedOn: data.pushed_at,
+        createdOn: data.created_at,
+        updatedOn,
         writtenIn: data.language,
     }
     void cachedProject(project, "stats", fetchedProjecStats)
@@ -118,7 +123,7 @@ export const downloadProjectReadme = logFn("GITHUB", "README", "downloadProjectR
     const { owner, repo } = project
     const branch = (await fetchProjectStats(project)).branch
     const readmePath = await fetchProjectReadmePath(project)
-    const destination = file(READMES, owner, repo, README)
+    const destination = afile(READMES, owner, repo, README)
     await dload([GITHUB_RAW_CONTENT_HOST, owner, repo, branch, readmePath], destination)
 })
 

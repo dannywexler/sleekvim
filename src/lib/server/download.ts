@@ -1,11 +1,11 @@
 import type { Strings } from "$src/common"
-import type { AnyFile } from "fluent-file"
+import type { AFile } from "fluent-file"
 import { ENV } from "$src/env"
 import download from "download"
 
 const HTTPS = "https://"
 
-export async function dload(urlPieces: Strings, destinationFile: AnyFile) {
+export async function dload(urlPieces: Strings, destinationFile: AFile) {
     let base = urlPieces.shift() ?? ""
     if (!base.startsWith(HTTPS)) {
         base = HTTPS + base
