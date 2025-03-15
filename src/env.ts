@@ -1,4 +1,4 @@
-import { env } from "node:process"
+import { env } from "bun"
 
 const PROD = env.NODE_ENV === "production"
 

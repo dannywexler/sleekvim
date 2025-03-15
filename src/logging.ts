@@ -1,13 +1,9 @@
 import { appendFile } from "node:fs/promises"
 import { afile } from "fluent-file"
-import stringify from "safe-stable-stringify"
+import { stringit, stringitPretty } from "./lib/utils/strings"
 import { DATA } from "./paths"
 
 type AnyFunc = (...args: any) => any
-
-function prettify(content: any) {
-    return stringify(content, null, 4)
-}
 
 export const LOG_LEVELS = ["INF", "WRN", "ERR"] as const
 export type Rec<Value = unknown> = Record<string, Value>
@@ -47,10 +43,10 @@ function logToConsole(timestamp: string, level: LogLevel, msg: string, data: Rec
     const pieces = [service, scope, func, message]
 
     if (method !== "log") {
-        console[method](timestamp, level, service, "=>", scope, "=>", func, "=>", msg, prettify(rest))
+        console[method](timestamp, level, service, "=>", scope, "=>", func, "=>", msg, stringitPretty(rest))
     }
     else {
-        console[method](pieces.join(" => "), prettify(rest))
+        console[method](pieces.join(" => "), stringitPretty(rest))
     }
 }
 
@@ -59,7 +55,7 @@ async function logToFile(timestamp: string, level: LogLevel, msg: string, data: 
     const year = date.substring(0, 4)
     const month = date.substring(5, 7)
 
-    const str = `${stringify({ ...data, timestamp, level, msg }) ?? ""}\n`
+    const str = `${stringit({ ...data, timestamp, level, msg })}\n`
     const logFile = afile(DATA, "logs", year, month, `${date}.log`)
 
     try {
@@ -79,16 +75,18 @@ export function logFn<Fn extends AnyFunc>(service: string, scope: string, func: 
     return async (...args: Parameters<InnerLogFunc<Fn>>): Promise<Awaited<ReturnType<Fn>>> => {
         const start = new Date()
         const startTime = start.toISOString()
-        const instanceID = [func, startTime, randID()].join("__")
+        const totalArgs = args.length
+        const inputArgs = Object.fromEntries(args.map((val, index) => [`arg${index.toString().padStart(totalArgs, "0")}`, val]))
+        const method = [service, scope, func].join(".")
+        const instanceID = [method, startTime, randID()].join("__")
         const lg = createLogger({
             func,
             instanceID,
             scope,
             service,
+            ...inputArgs,
         })
-        const totalArgs = args.length
-        const inputArgs = Object.fromEntries(args.map((val, index) => [`arg${index.toString().padStart(totalArgs, "0")}`, val]))
-        lg.log(`${func} called`, { startTime, stage: "CALLED", ...inputArgs })
+        lg.log(`${func} called`, { startTime, stage: "CALLED" })
 
         const output = await fn(...args, lg) as Promise<Awaited<ReturnType<Fn>>>
 

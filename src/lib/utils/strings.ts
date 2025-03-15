@@ -1,4 +1,5 @@
 import type { Strings } from "$src/common"
+import stringify from "safe-stable-stringify"
 import urlregexSafe from "url-regex-safe"
 
 export const URL_REGEX = urlregexSafe({
@@ -85,4 +86,19 @@ export class Str extends String {
 
 export function str(astring: string) {
     return new Str(astring)
+}
+
+function safeStringify(content: unknown, pretty: boolean) {
+    if (typeof content === "string") {
+        return content
+    }
+    return stringify(content, null, pretty ? 4 : undefined) ?? ""
+}
+
+export function stringit(content: unknown) {
+    return safeStringify(content, false)
+}
+
+export function stringitPretty(content: unknown) {
+    return safeStringify(content, true)
 }

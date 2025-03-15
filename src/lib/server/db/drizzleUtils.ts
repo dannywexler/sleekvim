@@ -1,12 +1,13 @@
 import { z } from "@hono/zod-openapi"
-import { boolean, integer, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, text as drizText, integer, timestamp } from "drizzle-orm/pg-core"
 import { createSchemaFactory } from "drizzle-zod"
 
 export const bool = () => boolean().notNull()
 export const date = () => timestamp({ mode: "date", withTimezone: true }).notNull()
 export const int = () => integer().notNull()
-export const txt = () => text().notNull()
-export const txtArray = () => text().notNull().array()
+export const text = () => drizText().notNull()
+export const maybeNullText = drizText
+export const textArray = () => text().array()
 
 const {
     createInsertSchema,

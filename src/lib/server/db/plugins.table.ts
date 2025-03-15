@@ -1,28 +1,30 @@
 import type { z } from "@hono/zod-openapi"
 import { pgTable } from "drizzle-orm/pg-core"
-import { bool, date, drizZodInsertSchema, drizZodSelectSchema, drizZodUpdateSchema, int, txt, txtArray } from "./drizzleUtils"
+import { bool, date, drizZodInsertSchema, drizZodSelectSchema, drizZodUpdateSchema, int, text, textArray } from "./drizzleUtils"
 
 export const PluginsTable = pgTable("plugins", {
     addedOn: date().defaultNow(),
-    branch: txt(),
-    category: txt(),
-    cmd: txtArray(),
+    branch: text(),
+    category: text(),
+    cmd: textArray(),
     createdOn: date(),
-    description: txt(),
-    event: txtArray(),
-    ft: txtArray(),
-    id: txt().primaryKey(),
+    description: text(),
+    etag: text(),
+    event: textArray(),
+    ft: textArray(),
+    id: text().primaryKey(),
     isArchived: bool(),
-    name: txt().unique(),
-    owner: txt(),
-    repo: txt(),
+    name: text().unique(),
+    owner: text(),
+    repo: text(),
     stars: int(),
     updatedOn: date(),
-    writtenIn: txt(),
+    writtenIn: text(),
 })
 
 export const pluginsTableInsert = drizZodInsertSchema(PluginsTable)
 export type PluginsTableInsert = z.infer<typeof pluginsTableInsert>
+export type PluginsTableInserts = Array<PluginsTableInsert>
 
 export const pluginsTableSelect = drizZodSelectSchema(PluginsTable)
 export type PluginsTableSelect = z.infer<typeof pluginsTableSelect>

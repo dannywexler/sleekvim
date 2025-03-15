@@ -24,7 +24,7 @@ const octokit = new Octokit({
 })
 
 octokit.hook.before("request", async () => {
-    await sleep(1000)
+    await sleep(ENV.DEV ? 100 : 1000)
 })
 
 export const README = "README.md"
@@ -82,10 +82,12 @@ async function cachedProject<Field extends keyof GithubCacheEntry>(
 
 export const fetchProjectStats = logFn("GITHUB", "STATS", "fetchProjectStats", async (project: GithubProject, lg: Alogger) => {
     const { owner, repo } = project
-    const cachedProjectStats = await cachedProject(project, "stats")
-    if (cachedProjectStats && ENV.DEV) {
-        lg.log("CACHED ProjectStats", { cachedProjectStats })
-        return cachedProjectStats
+    if (ENV.DEV) {
+        const cachedProjectStats = await cachedProject(project, "stats")
+        if (cachedProjectStats) {
+            lg.log("CACHED ProjectStats", { cachedProjectStats })
+            return cachedProjectStats
+        }
     }
     const { data } = await octokit.rest.repos.get({ owner, repo })
     const updatedMs = new Date(data.updated_at).getTime()
@@ -173,7 +175,7 @@ export const githubURL = z.string().url().transform((urlstr, { addIssue }) => {
             })
             return z.NEVER
         }
-        repo = lastPathPiece.replace("-", ".").replace(".md", "")
+        repo = lastPathPiece.replace("-", ".").replace("mini.git", "mini-git").replace(".md", "")
     }
     return {
         owner,
