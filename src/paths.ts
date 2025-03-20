@@ -6,6 +6,7 @@ import { afile, folder } from "fluent-file"
 const PROJECT_ROOT = folder(import.meta.dir, "..")
 export const DATA = folder(ENV.PROD ? "/" : PROJECT_ROOT, "data")
 export const DATABASE = DATA.subFolder("database")
+export const DATABASE_MIGRATIONS = PROJECT_ROOT.subFolder("db_migrations")
 export const CACHE = DATA.subFolder("cache")
 export const PROJECTS = DATA.subFolder("projects")
 export const READMES = DATA.subFolder("readmes")

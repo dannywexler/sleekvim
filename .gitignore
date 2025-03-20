@@ -1,6 +1,7 @@
 node_modules
 .eslintcache
 data
+db_migrations
 
 # Output
 .output

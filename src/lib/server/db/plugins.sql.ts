@@ -4,9 +4,7 @@ import { driz } from "./drizzle"
 import { PluginsTable } from "./plugins.table"
 
 export const PluginsSQL = {
-    getAll: logFn("DB", "PLUGINS", "getAll", async () => {
-        return driz.query.PluginsTable.findMany()
-    }),
+    find: (findPlugins?: FindPlugins) => driz.query.PluginsTable.findMany(findPlugins),
     add: logFn("DB", "PLUGINS", "add", async (newPlugin: PluginsTableInsert) => {
         const { id, ...rest } = newPlugin
         return driz
@@ -18,3 +16,5 @@ export const PluginsSQL = {
             })
     }),
 }
+
+export type FindPlugins = Parameters<typeof driz.query.PluginsTable.findMany>[0]

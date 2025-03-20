@@ -1,13 +1,13 @@
-import type { Alogger } from "$src/logging"
 import type { GithubProject } from "../github"
 import { filterMap } from "$src/lib/utils/arrays"
 import { hashit } from "$src/lib/utils/hashing"
-import { logFn } from "$src/logging"
 import { PluginsSQL } from "../db/plugins.sql"
 import { fetchProjectStats, projectID } from "../github"
 import { awesomeProjectParsedFile } from "./awesome.schema"
 
-export const collectPlugins = logFn("COLLECT", "PLUGINS", "collectPlugins", async (lg: Alogger) => {
+export async function collectPlugins() {
+    const lg = console
+    // export const collectPlugins = logFn("COLLECT", "PLUGINS", "collectPlugins", async (lg: Alogger) => {
     const parsedPluginsResult = await awesomeProjectParsedFile.read()
     if (parsedPluginsResult.isErr()) {
         lg.error("Could not read awesomeProjectParsedFile", { ...parsedPluginsResult.error })
@@ -15,7 +15,7 @@ export const collectPlugins = logFn("COLLECT", "PLUGINS", "collectPlugins", asyn
     }
     const parsedPlugins = parsedPluginsResult.value
 
-    const existingPlugins = await PluginsSQL.getAll()
+    const existingPlugins = await PluginsSQL.find()
     const existingPluginsCount = existingPlugins.length
     const existingPluginIds = new Set<string>()
     const existingPluginNames = new Set<string>()
@@ -129,7 +129,7 @@ export const collectPlugins = logFn("COLLECT", "PLUGINS", "collectPlugins", asyn
         lg.log("All plugin information is up to date.", counts)
     }
     return counts
-})
+}
 
 function normalizeAProject({ owner, repo }: GithubProject) {
     if (repo === "vim" || repo === "nvim" || repo === "neovim") {
@@ -137,12 +137,15 @@ function normalizeAProject({ owner, repo }: GithubProject) {
     }
 
     return repo
+        // eslint-disable-next-line regexp/no-unused-capturing-group
         .replace(/^(n|neo)?vim\W/, "")
+        // eslint-disable-next-line regexp/no-unused-capturing-group
         .replace(/\W(n|neo)?vim$/, "")
         .replace(/\Wlua$/, "")
         .replace(/\W+/g, "_")
 }
 
 if (import.meta.main) {
+    // eslint-disable-next-line antfu/no-top-level-await
     await collectPlugins()
 }

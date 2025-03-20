@@ -17,7 +17,7 @@
         "lint": "eslint .",
         "db:gen": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
-        "db:sync": "drizzle-kit generate && drizzle-kit migrate",
+        "db:sync": "rm -rf ./db_migrations && drizzle-kit generate && bun run ./src/lib/server/db/drizzle.ts",
         "db:push": "drizzle-kit push",
         "db:studio": "drizzle-kit studio"
     },
